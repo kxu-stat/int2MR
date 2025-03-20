@@ -1,7 +1,8 @@
 ---
 title: Integrative Mendelian randomization for detecting exposure-by-group interactions using group-specific and combined summary statistics
-author: "Ke Xu,Nathaniel Maydanchik, Bowei Kang, Jianhai Chen,
-Qixiang Chen, Gongyao Xu, Shinya Tasaki, David A. Bennett, Lin S. Chen"
+author: |
+  | Ke Xu, Nathaniel Maydanchik, Bowei Kang, Jianhai Chen, Qixiang Chen, Gongyao Xu,
+  | Shinya Tasaki, David A. Bennett, Lin S. Chen
 output:
   pdf_document: default
   latex_engine: xelatex
