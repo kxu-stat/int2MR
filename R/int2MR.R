@@ -18,8 +18,7 @@
 #' @param adapt_delta Target acceptance probability for the sampler (default 0.95).
 #'
 #' @return A list with elements depending on model_type. For each executed model, a data frame summarizing
-#'         the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided,
-#'         along with the full stanfit object.
+#'         the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided.
 #' @export
 int2MR <- function(data_list_3sample = NULL,
                               data_list_2sample = NULL,

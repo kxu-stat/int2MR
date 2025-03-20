@@ -23,6 +23,9 @@ library(devtools)
 
 # Install the int2MR package from GitHub
 install_github("Likeli-Ke/int2MR")
+
+# Load the int2MR package
+library(int2MR)
 ```
 
 # Input Data Format
@@ -44,17 +47,19 @@ Your input data should include:
   - IV-to-exposure effects
 - **Proportion of the comparison group (rho)** in each IV-to-outcome GWAS summary statistic.
 
-For further details on the example data formats included with the package, consult the help pages:
-```{r}
-help(example_3sample_data)
-help(example_2sample_data)
-```
 
 Load the example datasets provided with the package as follows:
 ```{r}
 data(example_3sample_data)
 data(example_2sample_data)
 ```
+
+For further details on the example data formats included with the package, consult the help pages.
+```{r}
+help(example_3sample_data)
+help(example_2sample_data)
+```
+
 
 # Running Examples
 
