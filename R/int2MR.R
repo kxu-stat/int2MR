@@ -101,7 +101,7 @@ prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale)
 
-    stan_mod_3sample <- stan_model(model_code = stan_model_code_3)
+    stan_mod_3sample <- stan_model(model_code = stan_model_code_3, verbose = FALSE)
 
     # Run sampling for the 3-sample model.
     fit_3 <- sampling(object = stan_mod_3sample,
@@ -196,7 +196,7 @@ model {
 prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale)
 
-  stan_mod_2sample <- stan_model(model_code = stan_model_code_2)
+  stan_mod_2sample <- stan_model(model_code = stan_model_code_2, verbose = FALSE)
 
   # Run sampling for the 2-sample model.
   fit_2 <- sampling(object = stan_mod_2sample,
