@@ -1,0 +1,97 @@
+---
+title: Integrative Mendelian randomization for detecting exposure-by-group interactions using group-specific and combined summary statistics
+author: "Ke Xu,Nathaniel Maydanchik, Bowei Kang, Jianhai Chen,
+Qixiang Chen, Gongyao Xu, Shinya Tasaki, David A. Bennett, Lin S. Chen"
+output:
+  pdf_document: default
+  latex_engine: xelatex
+  word_document: default
+  html_document:
+    df_print: paged
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introduction
+This vignette provides an introduction to the `int2MR` package. The R package `int2MR` implements the int2MR method for detecting both direct exposure-outcome effect within comparison group and reference group and exposure-group interaction effect.
+
+Before installing int2MR, ensure that you have the devtools package installed. The package also requires rstan for Bayesian modeling. To install the development version of int2MR, run:
+```{r}
+# Load devtools package
+library(devtools)
+
+# Install the int2MR package from GitHub
+install_github("Likeli-Ke/int2MR")
+```
+
+# Input Data Format
+
+The `int2MR` package supports two types of GWAS summary statistics:
+
+- **Three-sample data**: Utilizes three separate IV-to-outcome GWAS statistics.
+- **Two-sample data**: Utilizes two IV-to-outcome GWAS summary statistics.
+
+To detect the exposure-group interaction effect, it is essential that the proportion of the comparison group (denoted as rho) varies among the provided GWAS summary statistics.
+
+## Data Requirements
+
+Your input data should include:
+
+- **Number of IVs** (instrumental variables)
+- **Point estimates** and **squared standard errors** for:
+  - IV-to-outcome effects
+  - IV-to-exposure effects
+- **Proportion of the comparison group (rho)** in each IV-to-outcome GWAS summary statistic.
+
+For further details on the example data formats included with the package, consult the help pages:
+```{r}
+help(example_3sample_data)
+help(example_2sample_data)
+```
+
+Load the example datasets provided with the package as follows:
+```{r}
+data(example_3sample_data)
+data(example_2sample_data)
+```
+
+# Running Examples
+
+This section demonstrates how to run `int2MR` using simulated data. Two examples are provided: one for three-sample data and one for two-sample data.
+
+## Example 1: Three-Sample Data
+
+In this example, we perform an analysis on simulated three-sample data. The parameters include:
+
+- **model_type**: "3sample"
+- **Prior distributions**: Inverse gamma priors with a shape and scale of 0.1
+- **MCMC Settings**: 2 chains, 5000 iterations with a warm-up period of 1000 iterations, and an adapt_delta of 0.95. 
+
+```{r}
+result_3sample <- int2MR(data_list_3sample = example_3sample_data,
+                 model_type = "3sample",
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
+                 chains = 2, iter = 5000, warmup = 1000,
+                 adapt_delta = 0.95)
+
+# Display the results for the three-sample analysis
+result_3sample$result_3sample
+```
+
+## Example 2: Two-Sample Data
+
+This example demonstrates an analysis using simulated two-sample data. The configuration is similar to the three-sample analysis, with `model_type` set to "2sample".
+
+```{r}
+result_2sample <- int2MR(data_list_2sample = example_2sample_data,
+                 model_type = "2sample",
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
+                 chains = 2, iter = 5000, warmup = 1000,
+                 adapt_delta = 0.95)
+
+# Display the results for the two-sample analysis
+result_2sample$result_2sample
+```
