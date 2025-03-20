@@ -112,26 +112,18 @@ prior_inv_gamma_shape, prior_inv_gamma_scale)
                       control = control_list,
                       refresh = 0)
 
-    opt_3 <- optimizing(
-      object = stan_mod_3sample,
-      data = data_list_3sample,
-      hessian = TRUE)
-
-    hessian_reg_3 <- opt_3$hessian
-    cov_3 <- MASS::ginv(-hessian_reg_3)
-    rownames(cov_3) <- rownames(hessian_reg_3)
-    colnames(cov_3) <- colnames(hessian_reg_3)
-
-    # Extract posterior samples and compute summaries.
     samples_3 <- rstan::extract(fit_3)
     est_beta_3 <- mean(samples_3$beta)
-    se_beta_3 <- sqrt(cov_3["beta", "beta"])
+    # se_beta_3 <- sqrt(cov_3["beta", "beta"])
+    se_beta_3 <- sd(samples_3$beta)
     est_beta_int_3 <- mean(samples_3$beta_int)
-    se_beta_int_3 <-  sqrt(cov_3["beta_int", "beta_int"])
+    # se_beta_int_3 <-  sqrt(cov_3["beta_int", "beta_int"])
+    se_beta_int_3 <- sd(samples_3$beta_int)
     total_3 <- mean(samples_3$beta+samples_3$beta_int)
-    se_total_3 <- sqrt(cov_3["beta_int", "beta_int"]
-                       + cov_3["beta", "beta"]
-                       + 2 * cov_3["beta_int", "beta"])
+    # se_total_3 <- sqrt(cov_3["beta_int", "beta_int"]
+    #                    + cov_3["beta", "beta"]
+    #                    + 2 * cov_3["beta_int", "beta"])
+    se_total_3 <- sd(samples_3$beta+samples_3$beta_int)
 
     result_3sample <- data.frame(
       est_beta = est_beta_3,
@@ -207,26 +199,29 @@ prior_inv_gamma_shape, prior_inv_gamma_scale)
                     control = control_list,
                     refresh = 0)
 
-  opt_2 <- optimizing(
-    object = stan_mod_2sample,
-    data = data_list_2sample,
-    hessian = TRUE)
+  # opt_2 <- optimizing(
+  #   object = stan_mod_2sample,
+  #   data = data_list_2sample,
+  #   hessian = TRUE)
 
-  hessian_reg_2 <- opt_2$hessian
-  cov_2 <- MASS::ginv(-hessian_reg_2)
-  rownames(cov_2) <- rownames(hessian_reg_2)
-  colnames(cov_2) <- colnames(hessian_reg_2)
+  # hessian_reg_2 <- opt_2$hessian
+  # cov_2 <- MASS::ginv(-hessian_reg_2)
+  # rownames(cov_2) <- rownames(hessian_reg_2)
+  # colnames(cov_2) <- colnames(hessian_reg_2)
 
   # Extract posterior samples and compute summaries.
   samples_2 <- rstan::extract(fit_2)
   est_beta_2 <- mean(samples_2$beta)
-  se_beta_2 <- sqrt(cov_2["beta", "beta"])
+  # se_beta_2 <- sqrt(cov_2["beta", "beta"])
+  se_beta_2 <- sd(samples_2$beta)
   est_beta_int_2 <- mean(samples_2$beta_int)
-  se_beta_int_2 <-  sqrt(cov_2["beta_int", "beta_int"])
+  # se_beta_int_2 <-  sqrt(cov_2["beta_int", "beta_int"])
+  se_beta_int_2 <- sd(samples_2$beta_int)
   total_2 <- mean(samples_2$beta+samples_2$beta_int)
-  se_total_2 <- sqrt(cov_2["beta_int", "beta_int"]
-                     + cov_2["beta", "beta"]
-                     + 2 * cov_2["beta_int", "beta"])
+  # se_total_2 <- sqrt(cov_2["beta_int", "beta_int"]
+  #                    + cov_2["beta", "beta"]
+  #                    + 2 * cov_2["beta_int", "beta"])
+  se_total_2 <- sd(samples_2$beta+samples_2$beta_int)
 
   result_2sample <- data.frame(
     est_beta = est_beta_2,
