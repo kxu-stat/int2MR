@@ -73,15 +73,15 @@ This section demonstrates how to run `int2MR` using simulated data. Two examples
 In this example, we perform an analysis on simulated three-sample data. The parameters include:
 
 -   **model_type**: "3sample"
--   **Prior distributions**: Inverse gamma priors with a shape and scale of 0.01
--   **MCMC Settings**: 4 chains, 10000 iterations with a warm-up period of 2500 iterations, and an adapt_delta of 0.95.
+-   **Prior distributions**: Inverse gamma priors with a shape and scale of 0.1
+-   **MCMC Settings**: 2 chains, 10000 iterations with a warm-up period of 2500 iterations, and an adapt_delta of 0.95.
 
 ```{r}
 result_3sample <- int2MR(data_list_3sample = example_3sample_data,
                  model_type = "3sample",
-                 prior_inv_gamma_shape = 0.01,
-                 prior_inv_gamma_scale = 0.01,
-                 chains = 4, iter = 10000, warmup = 2500,
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
+                 chains = 2, iter = 10000, warmup = 2500,
                  adapt_delta = 0.95)
 
 # Display the results for the three-sample analysis
@@ -95,9 +95,9 @@ This example demonstrates an analysis using simulated two-sample data. The confi
 ```{r}
 result_2sample <- int2MR(data_list_2sample = example_2sample_data,
                  model_type = "2sample",
-                 prior_inv_gamma_shape = 0.01,
-                 prior_inv_gamma_scale = 0.01,
-                 chains = 4, iter = 10000, warmup = 2500,
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
+                 chains = 2, iter = 10000, warmup = 2500,
                  adapt_delta = 0.95)
 
 # Display the results for the two-sample analysis
