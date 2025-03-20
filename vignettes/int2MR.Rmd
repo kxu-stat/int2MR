@@ -76,8 +76,8 @@ In this example, we perform an analysis on simulated three-sample data. The para
 ```{r}
 result_3sample <- int2MR(data_list_3sample = example_3sample_data,
                  model_type = "3sample",
-                 prior_inv_gamma_shape = 0.01,
-                 prior_inv_gamma_scale = 0.01,
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
                  chains = 2, iter = 10000, warmup = 2000,
                  adapt_delta = 0.95)
 
@@ -92,8 +92,8 @@ This example demonstrates an analysis using simulated two-sample data. The confi
 ```{r}
 result_2sample <- int2MR(data_list_2sample = example_2sample_data,
                  model_type = "2sample",
-                 prior_inv_gamma_shape = 0.01,
-                 prior_inv_gamma_scale = 0.01,
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
                  chains = 2, iter = 10000, warmup = 2500,
                  adapt_delta = 0.95)
 
