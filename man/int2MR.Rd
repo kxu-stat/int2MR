@@ -9,7 +9,7 @@ int2MR(
   data_list_2sample = NULL,
   model_type = c("3sample", "2sample"),
   prior_inv_gamma_shape = 0.1,
-  prior_inv_gamma_scale = 0.2,
+  prior_inv_gamma_scale = 0.1,
   chains = 2,
   iter = 5000,
   warmup = 2500,
@@ -40,8 +40,7 @@ or "both" (default) to run both.}
 }
 \value{
 A list with elements depending on model_type. For each executed model, a data frame summarizing
-        the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided,
-        along with the full stanfit object.
+        the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided.
 }
 \description{
 This function takes input data lists for the three-sample and/or two-sample Stan models
