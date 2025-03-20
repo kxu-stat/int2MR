@@ -1,0 +1,14 @@
+Package: int2MR
+Type: Package
+Title: Integrative Mendelian Randomization for Detecting Exposure-by-Group Interactions Using Group-Specific and Combined Summary Statistics
+Version: 0.1.0
+Authors@R: person("Ke", "Xu", email = "kxu@nd.edu", role = c("aut", "cre"))
+Description: This package provides a function to run one round of intMR estimation for both the exposure-outcome direct effect and the exposure-by-group interaction effect using rstan's sampling function. It offers options for using both two-sample and three-sample GWAS summary statistics.
+Depends: R (>= 3.6)
+Imports:
+    rstan,
+    stats
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
