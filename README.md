@@ -22,6 +22,10 @@ library(int2MR)
 
 Please refer to the ['int2MR' vignette](https://github.com/Likeli-Ke/int2MR/blob/main/vignettes/int2MR.pdf) for a tutorial to use the 'int2MR' package.
 
+# Dataset
+
+The data analysis results underlying the Figures and Tables are available in folder 'raw'.
+
 # Reference
 Ke Xu, Nathaniel Maydanchik, Bowei Kang, Jianhai Chen, Qixiang Chen, Gongyao Xu, Shinya Tasaki, David A. Bennett, Lin S. Chen. Integrative Mendelian Randomization for Detecting Exposure-by-group Interactions Using Group-Specific and Combined Summary Statistics. [doi.org/10.1101/2025.01.26.25321136](https://doi.org/10.1101/2025.01.26.25321136)
 
