@@ -15,83 +15,63 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Introduction
+# Introduction
 
-This vignette provides an introduction to the `int2MR` package. The R package `int2MR` implements the int2MR method for detecting both direct exposure-outcome effect within comparison group and reference group and exposure-group interaction effect.
+This vignette provides an introduction to the `int2MR` R package. The `int2MR` package implements the int2MR method for detecting group-specific exposure-outcome effects and exposure-group interaction effects using summary statistics. 
 
-Before installing int2MR, ensure that you have the devtools package installed. The package also requires rstan for Bayesian modeling. To install the development version of int2MR, run:
+Before installing `int2MR`, ensure that the `devtools` package is installed. `int2MR` also requires `rstan` for Bayesian modeling. To install and load the development version of `int2MR`, run:
 
 ```{r}
 # Load devtools package
-library(devtools)
+suppressMessages(library(devtools))
 
-# Install the int2MR package from GitHub
+# Install int2MR from GitHub
 install_github("Likeli-Ke/int2MR")
 
-# Load the int2MR package
+# Load int2MR
 library(int2MR)
+
+# Load rstan
+suppressMessages(library(rstan))
 ```
 
 # Input Data Format
 
-The `int2MR` package supports two types of GWAS summary statistics:
+The `int2MR` package supports two types of input:
 
--   **Three-sample data**: Utilizes three separate IV-to-outcome GWAS statistics.
--   **Two-sample data**: Utilizes two IV-to-outcome GWAS summary statistics.
+-   **Two-sample data**: For integrating two sets of IV-to-outcome GWAS summary statistics.
+-   **Three-sample data**: For Integrating three sets of IV-to-outcome GWAS summary statistics.
 
-To detect the exposure-group interaction effect, it is essential that the proportion of the comparison group (denoted as rho) varies among the provided GWAS summary statistics.
-
-## Data Requirements
-
-Your input data should include:
-
--   **Number of IVs** (instrumental variables)
--   **Point estimates** and **squared standard errors** for:
-    -   IV-to-outcome effects
-    -   IV-to-exposure effects
--   **Proportion of the comparison group (rho)** in each IV-to-outcome GWAS summary statistic.
-
-Load the example datasets provided with the package as follows:
+Two-sample input data must be a list with the following components: `p` is the number of IVs; `hat_gamma` and `hat_s_gamma_sq` are the estimated IV-to-exposure effects and their variances (squared standard errors); `hat_Gamma1` and `hat_s1_sq` are the estimated IV-to-outcome effects for the first IV-to-outcome GWAS summary statistic and their variances; `hat_Gamma2` and `hat_s2_sq` are the estimated IV-to-outcome effects for the second IV-to-outcome GWAS summary statistic and their variances; `rho1` is the proportion of the comparison group in the sample of the first GWAS summary statistic; and `rho2` is the proportion of the comparison group in the sample of the second GWAS summary statistic.
 
 ```{r}
-data(example_3sample_data)
+# Load the example two-sample data
 data(example_2sample_data)
+names(example_2sample_data)
 ```
 
-For further details on the example data formats included with the package, consult the help pages.
+Three-sample input data additionally contains `hat_Gamma3`, `hat_s3_sq`, and `rho3` for the third GWAS summary statistic.
 
 ```{r}
-help(example_3sample_data)
-help(example_2sample_data)
+# Load the example three-sample data
+data(example_3sample_data)
+names(example_3sample_data)
 ```
+
+To detect the exposure-group interaction effect, the proportion of the comparison group in the samples (rho) must vary among the provided GWAS summary statistics.
 
 # Running Examples
 
-This section demonstrates how to run `int2MR` using simulated data. Two examples are provided: one for three-sample data and one for two-sample data.
+This section demonstrates how to run `int2MR` using simulated data. Two examples are provided: one for two-sample data and one for three-sample data.
 
-## Example 1: Three-Sample Data
+## Example 1: Two-Sample Data
 
-In this example, we perform an analysis on simulated three-sample data. The parameters include:
+In this example, we perform an analysis on simulated two-sample data. The parameters include:
 
--   **model_type**: "3sample"
+-   **data_list_2sample**: Input data for two-sample analysis. Note that the `data_list_3sample` argument is left null
+-   **model_type**: "2sample"
 -   **Prior distributions**: Inverse gamma priors with a shape and scale of 0.1
--   **MCMC Settings**: 2 chains, 10000 iterations with a warm-up period of 2500 iterations, and an adapt_delta of 0.95.
-
-```{r}
-result_3sample <- int2MR(data_list_3sample = example_3sample_data,
-                 model_type = "3sample",
-                 prior_inv_gamma_shape = 0.1,
-                 prior_inv_gamma_scale = 0.1,
-                 chains = 2, iter = 10000, warmup = 2500,
-                 adapt_delta = 0.95)
-
-# Display the results for the three-sample analysis
-result_3sample$result_3sample
-```
-
-## Example 2: Two-Sample Data
-
-This example demonstrates an analysis using simulated two-sample data. The configuration is similar to the three-sample analysis, with `model_type` set to "2sample".
+-   **MCMC Settings**: 2 chains, 10,000 iterations with a warm-up period of 2,500 iterations, and an adapt_delta of 0.95.
 
 ```{r}
 result_2sample <- int2MR(data_list_2sample = example_2sample_data,
@@ -103,4 +83,21 @@ result_2sample <- int2MR(data_list_2sample = example_2sample_data,
 
 # Display the results for the two-sample analysis
 result_2sample$result_2sample
+```
+`est_beta` is the estimated group-specific exposure-outcome effect for the reference group, and `se_beta` and `pval_beta` are its standard error and p-value, respectively. `est_beta_int` is the estimated exposure-group interaction effect, and `se_beta_int` and `pval_beta_int` are its standard error and p-value, respectively. `total_effect` is the estimated group-specific exposure-outcome effect for the comparison group and `pval_total` is its respective p-value.
+
+## Example 2: Three-Sample Data
+
+In this example, we perform an analysis on simulated three-sample data. The configuration is similar to the two-sample analysis, except the `data_list_3sample` argument is used instead of `data_list_2sample` and `model_type` is set to "3sample".
+
+```{r}
+result_3sample <- int2MR(data_list_3sample = example_3sample_data,
+                 model_type = "3sample",
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1,
+                 chains = 2, iter = 10000, warmup = 2500,
+                 adapt_delta = 0.95)
+
+# Display the results for the three-sample analysis
+result_3sample$result_3sample
 ```
