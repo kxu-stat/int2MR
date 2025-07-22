@@ -12,7 +12,7 @@ Before installing int2MR, ensure that you have the devtools package installed, a
 library(devtools)
 
 # Install the int2MR package from GitHub
-install_github("Likeli-Ke/int2MR")
+install_github("kxu-stat/int2MR")
 
 # Load the int2MR package
 library(int2MR)
