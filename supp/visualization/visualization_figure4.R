@@ -290,11 +290,3 @@ for (cat in names(category_positions)) {
 
 # Display the plot
 print(p)
-
-# Save the figure
-ggsave(
-  "/Users/xuke/Desktop/Figure4.png",
-  plot = p,
-  width = 12, height = 8,
-  dpi = 300, units = "in"
-)
