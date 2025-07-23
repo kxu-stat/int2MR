@@ -19,6 +19,16 @@
 #'
 #' @return A list with elements depending on model_type. For each executed model, a data frame summarizing
 #'         the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided.
+#'
+#' @note  
+#' When you call `stan_model(model_code = ...)` with the same Stan code string **and** the same
+#' `prior_inv_gamma_shape`/`prior_inv_gamma_scale`, rstan will look for a previously compiled
+#' binary (in `~/.R/stan/`); if found, it reuses it, otherwise it recompiles.  
+#' **To avoid slow repeated compilation** in large-scale runs, either  
+#' 1. always pass identical hyperparameters so the cache hits; or  
+#' 2. move the two `stan_model()` calls outside of this function (compile once),  
+#'    then pass the precompiled model objects into `int2MR()`.  
+#'
 #' @export
 int2MR <- function(data_list_3sample = NULL,
                               data_list_2sample = NULL,
