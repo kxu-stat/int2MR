@@ -26,15 +26,15 @@ int2MR(
 "2sample" to run only the two-sample model,
 or "both" (default) to run both.}
 
-\item{prior_inv_gamma_shape}{Prior shape parameter for the inverse-gamma distributions (default 0.2).}
+\item{prior_inv_gamma_shape}{Prior shape parameter for the inverse-gamma distributions (default 0.02).}
 
-\item{prior_inv_gamma_scale}{Prior scale parameter for the inverse-gamma distributions (default 0.2).}
+\item{prior_inv_gamma_scale}{Prior scale parameter for the inverse-gamma distributions (default 0.02).}
 
-\item{chains}{Number of chains for MCMC sampling (default 4).}
+\item{chains}{Number of chains for MCMC sampling (default 2).}
 
-\item{iter}{Total number of iterations per chain (default 2000).}
+\item{iter}{Total number of iterations per chain (default 5000).}
 
-\item{warmup}{Number of warmup (burn-in) iterations (default 1000).}
+\item{warmup}{Number of warmup (burn-in) iterations (default 2000).}
 
 \item{adapt_delta}{Target acceptance probability for the sampler (default 0.95).}
 }

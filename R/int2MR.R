@@ -10,11 +10,11 @@
 #'        "3sample" to run only the three-sample model,
 #'        "2sample" to run only the two-sample model,
 #'        or "both" (default) to run both.
-#' @param prior_inv_gamma_shape Prior shape parameter for the inverse-gamma distributions (default 0.2).
-#' @param prior_inv_gamma_scale Prior scale parameter for the inverse-gamma distributions (default 0.2).
-#' @param chains Number of chains for MCMC sampling (default 4).
-#' @param iter Total number of iterations per chain (default 2000).
-#' @param warmup Number of warmup (burn-in) iterations (default 1000).
+#' @param prior_inv_gamma_shape Prior shape parameter for the inverse-gamma distributions (default 0.02).
+#' @param prior_inv_gamma_scale Prior scale parameter for the inverse-gamma distributions (default 0.02).
+#' @param chains Number of chains for MCMC sampling (default 2).
+#' @param iter Total number of iterations per chain (default 5000).
+#' @param warmup Number of warmup (burn-in) iterations (default 2000).
 #' @param adapt_delta Target acceptance probability for the sampler (default 0.95).
 #'
 #' @return A list with elements depending on model_type. For each executed model, a data frame summarizing
@@ -33,9 +33,9 @@
 int2MR <- function(data_list_3sample = NULL,
                               data_list_2sample = NULL,
                               model_type = c("3sample", "2sample"),
-                              prior_inv_gamma_shape = 0.1,
-                              prior_inv_gamma_scale = 0.1,
-                              chains = 2, iter = 5000, warmup = 2500,
+                              prior_inv_gamma_shape = 0.02,
+                              prior_inv_gamma_scale = 0.02,
+                              chains = 2, iter = 5000, warmup = 2000,
                               adapt_delta = 0.95) {
   # Match the model_type argument
   model_type <- match.arg(model_type)
