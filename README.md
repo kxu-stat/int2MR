@@ -38,6 +38,8 @@ result_2sample_opt$result_2sample
 
 The `estimation` argument controls how `est_beta` and `est_beta_int` are estimated: `estimation = "sampling"` uses MCMC posterior means, while `estimation = "optimizing"` uses the MAP estimate from `rstan::optimizing()`. In both modes, standard errors such as `se_beta` and `se_beta_int` are computed from the inverse negative Hessian.
 
+The inverse-gamma hyperparameters control the prior scale of uncorrelated pleiotropic-effect variance components. As a rule of thumb, start with `prior_inv_gamma_shape = prior_inv_gamma_scale = 0.02` for weak or sparse uncorrelated pleiotropic effects, try `0.1` for moderate effects, and check stronger effects with a small sensitivity grid such as `c(0.02, 0.05, 0.1, 0.2, 0.5)`. Report whether `est_beta` and `est_beta_int` are stable across the grid rather than relying on a single setting.
+
 # Other
 The code for simulation and visualization is store in the folder [supp](https://github.com/kxu-stat/int2MR/blob/main/supp). The GWAS summary statistics from ROSMAP and primary data analysis results are availale at [Zenodo](https://doi.org/10.5281/zenodo.16341091).
 

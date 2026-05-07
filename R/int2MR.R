@@ -18,6 +18,11 @@
 #'        standard errors from the inverse negative Hessian in both modes.
 #' @param prior_inv_gamma_shape Prior shape parameter for the inverse-gamma distributions (default 0.02).
 #' @param prior_inv_gamma_scale Prior scale parameter for the inverse-gamma distributions (default 0.02).
+#'        Smaller values put more prior mass near sparse/small uncorrelated pleiotropic-effect
+#'        variances, while larger values allow more dispersion. As a rule of thumb, start with
+#'        `prior_inv_gamma_shape = prior_inv_gamma_scale = 0.02` for weak or sparse uncorrelated
+#'        pleiotropic effects, try `0.1` for moderate effects, and check stronger effects with a
+#'        small sensitivity grid such as `c(0.02, 0.05, 0.1, 0.2, 0.5)`.
 #' @param chains Number of chains for MCMC sampling (default 2).
 #' @param iter Total number of iterations per chain (default 5000).
 #' @param warmup Number of warmup (burn-in) iterations (default 2000).
