@@ -9,10 +9,14 @@ output:
   word_document: default
   html_document:
     df_print: paged
+vignette: >
+  %\VignetteIndexEntry{int2MR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
 # Introduction
@@ -21,7 +25,7 @@ This vignette provides an introduction to the `int2MR` R package. The `int2MR` p
 
 Before installing `int2MR`, ensure that the `devtools` package is installed. `int2MR` also requires `rstan` for Bayesian modeling. To install and load the development version of `int2MR`, run:
 
-```{r}
+```{r install, eval=FALSE}
 # Load devtools package
 suppressMessages(library(devtools))
 
@@ -44,7 +48,7 @@ The `int2MR` package supports two types of input:
 
 Two-sample input data must be a list with the following components: `p` is the number of IVs; `hat_gamma` and `hat_s_gamma_sq` are the estimated IV-to-exposure effects and their variances (squared standard errors); `hat_Gamma1` and `hat_s1_sq` are the estimated IV-to-outcome effects for the first IV-to-outcome GWAS summary statistic and their variances; `hat_Gamma2` and `hat_s2_sq` are the estimated IV-to-outcome effects for the second IV-to-outcome GWAS summary statistic and their variances; `rho1` is the proportion of the comparison group in the sample of the first GWAS summary statistic; and `rho2` is the proportion of the comparison group in the sample of the second GWAS summary statistic.
 
-```{r}
+```{r two-sample-data, eval=FALSE}
 # Load the example two-sample data
 data(example_2sample_data)
 names(example_2sample_data)
@@ -52,7 +56,7 @@ names(example_2sample_data)
 
 Three-sample input data additionally contains `hat_Gamma3`, `hat_s3_sq`, and `rho3` for the third GWAS summary statistic.
 
-```{r}
+```{r three-sample-data, eval=FALSE}
 # Load the example three-sample data
 data(example_3sample_data)
 names(example_3sample_data)
@@ -70,10 +74,11 @@ In this example, we perform an analysis on simulated two-sample data. The parame
 
 -   **data_list_2sample**: Input data for two-sample analysis. Note that the `data_list_3sample` argument is left null
 -   **model_type**: "2sample"
+-   **estimation**: "sampling" for MCMC posterior mean effect estimates, or "optimizing" for optimization-based MAP effect estimates
 -   **Prior distributions**: Inverse gamma priors with a shape and scale of 0.1
 -   **MCMC Settings**: 2 chains, 10,000 iterations with a warm-up period of 2,500 iterations, and an adapt_delta of 0.95.
 
-```{r}
+```{r two-sample-sampling, eval=FALSE}
 result_2sample <- int2MR(data_list_2sample = example_2sample_data,
                  model_type = "2sample",
                  prior_inv_gamma_shape = 0.1,
@@ -86,11 +91,23 @@ result_2sample$result_2sample
 ```
 `est_beta` is the estimated group-specific exposure-outcome effect for the reference group, and `se_beta` and `pval_beta` are its standard error and p-value, respectively. `est_beta_int` is the estimated exposure-group interaction effect, and `se_beta_int` and `pval_beta_int` are its standard error and p-value, respectively. `total_effect` is the estimated group-specific exposure-outcome effect for the comparison group and `pval_total` is its respective p-value.
 
+To estimate the effects without MCMC sampling, use `estimation = "optimizing"`. The `estimation` argument controls how `est_beta` and `est_beta_int` are estimated: sampling mode uses MCMC posterior means, while optimizing mode uses the MAP estimates. In both modes, `se_beta`, `se_beta_int`, and `se_total` are computed from the inverse negative Hessian.
+
+```{r two-sample-optimizing, eval=FALSE}
+result_2sample_opt <- int2MR(data_list_2sample = example_2sample_data,
+                 model_type = "2sample",
+                 estimation = "optimizing",
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1)
+
+result_2sample_opt$result_2sample
+```
+
 ## Example 2: Three-Sample Data
 
 In this example, we perform an analysis on simulated three-sample data. The configuration is similar to the two-sample analysis, except the `data_list_3sample` argument is used instead of `data_list_2sample` and `model_type` is set to "3sample".
 
-```{r}
+```{r three-sample-sampling, eval=FALSE}
 result_3sample <- int2MR(data_list_3sample = example_3sample_data,
                  model_type = "3sample",
                  prior_inv_gamma_shape = 0.1,
@@ -101,3 +118,5 @@ result_3sample <- int2MR(data_list_3sample = example_3sample_data,
 # Display the results for the three-sample analysis
 result_3sample$result_3sample
 ```
+
+The three-sample model can also be run with `estimation = "optimizing"` to use the same optimization-based estimation path.

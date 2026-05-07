@@ -1,8 +1,10 @@
-#' Run One Round of int2MR Estimation with Sampling and Model Type Option
+#' Run One Round of int2MR Estimation with Sampling or Optimization
 #'
 #' This function takes input data lists for the three-sample and/or two-sample Stan models
-#' and returns posterior summaries from running rstan's sampling function. The user can specify
-#' which model(s) to run via the model_type parameter.
+#' and returns effect estimates from either rstan's sampling function or rstan's
+#' optimization function. Standard errors are computed from the inverse negative
+#' Hessian in both modes. The user can specify which model(s) to run via the
+#' model_type parameter.
 #'
 #' @param data_list_3sample A named list containing data for the 3-sample Stan model.
 #' @param data_list_2sample A named list containing data for the 2-sample Stan model.
@@ -10,6 +12,10 @@
 #'        "3sample" to run only the three-sample model,
 #'        "2sample" to run only the two-sample model,
 #'        or "both" (default) to run both.
+#' @param estimation A character string specifying the estimation method:
+#'        "sampling" (default) to estimate effects using MCMC posterior means, or
+#'        "optimizing" to use Stan's optimization-based MAP estimate with
+#'        standard errors from the inverse negative Hessian in both modes.
 #' @param prior_inv_gamma_shape Prior shape parameter for the inverse-gamma distributions (default 0.02).
 #' @param prior_inv_gamma_scale Prior scale parameter for the inverse-gamma distributions (default 0.02).
 #' @param chains Number of chains for MCMC sampling (default 2).
@@ -18,7 +24,7 @@
 #' @param adapt_delta Target acceptance probability for the sampler (default 0.95).
 #'
 #' @return A list with elements depending on model_type. For each executed model, a data frame summarizing
-#'         the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided.
+#'         the estimate, Hessian-based standard error, and p-values for beta, beta_int, and the total effect is provided.
 #'
 #' @note  
 #' When you call `stan_model(model_code = ...)` with the same Stan code string **and** the same
@@ -32,24 +38,98 @@
 #' @export
 int2MR <- function(data_list_3sample = NULL,
                               data_list_2sample = NULL,
-                              model_type = c("3sample", "2sample"),
+                              model_type = c("both", "3sample", "2sample"),
+                              estimation = c("sampling", "optimizing"),
                               prior_inv_gamma_shape = 0.02,
                               prior_inv_gamma_scale = 0.02,
                               chains = 2, iter = 5000, warmup = 2000,
                               adapt_delta = 0.95) {
   # Match the model_type argument
   model_type <- match.arg(model_type)
+  estimation <- match.arg(estimation)
 
-  # Load required packages
-  require(rstan)
-  rstan_options(auto_write = TRUE)
+  if (!requireNamespace("rstan", quietly = TRUE))
+    stop("Package 'rstan' is required to run int2MR.")
+  rstan::rstan_options(auto_write = TRUE)
 
   # Set common control parameters for sampling
   control_list <- list(adapt_delta = adapt_delta)
 
   results <- list()
 
-  if (model_type %in% c("3sample")) {
+  summarize_stan_estimate <- function(est_beta, se_beta, est_beta_int, se_beta_int,
+                                      total_effect, se_total) {
+    data.frame(
+      est_beta = unname(est_beta),
+      se_beta = unname(se_beta),
+      pval_beta = unname(2 * (1 - stats::pnorm(abs(est_beta) / se_beta))),
+      est_beta_int = unname(est_beta_int),
+      se_beta_int = unname(se_beta_int),
+      pval_beta_int = unname(2 * (1 - stats::pnorm(abs(est_beta_int) / se_beta_int))),
+      total_effect = unname(total_effect),
+      se_total = unname(se_total),
+      pval_total = unname(2 * (1 - stats::pnorm(abs(total_effect) / se_total)))
+    )
+  }
+
+  summarize_with_hessian <- function(est_beta, est_beta_int, cov_mat) {
+    se_beta <- sqrt(cov_mat["beta", "beta"])
+    se_beta_int <- sqrt(cov_mat["beta_int", "beta_int"])
+    total_effect <- est_beta + est_beta_int
+    se_total <- sqrt(cov_mat["beta", "beta"] +
+                       cov_mat["beta_int", "beta_int"] +
+                       2 * cov_mat["beta", "beta_int"])
+
+    summarize_stan_estimate(
+      est_beta = est_beta,
+      se_beta = se_beta,
+      est_beta_int = est_beta_int,
+      se_beta_int = se_beta_int,
+      total_effect = total_effect,
+      se_total = se_total
+    )
+  }
+
+  run_stan_estimation <- function(stan_model, data_list) {
+    opt <- rstan::optimizing(
+      object = stan_model,
+      data = data_list,
+      hessian = TRUE
+    )
+
+    hessian_reg <- opt$hessian
+    cov_mat <- MASS::ginv(-hessian_reg)
+    rownames(cov_mat) <- rownames(hessian_reg)
+    colnames(cov_mat) <- colnames(hessian_reg)
+
+    if (estimation == "optimizing") {
+      return(
+        summarize_with_hessian(
+          est_beta = opt$par["beta"],
+          est_beta_int = opt$par["beta_int"],
+          cov_mat = cov_mat
+        )
+      )
+    }
+
+    fit <- rstan::sampling(
+      object = stan_model,
+      data = data_list,
+      chains = chains,
+      iter = iter,
+      warmup = warmup,
+      control = control_list,
+      refresh = 0
+    )
+    samples <- rstan::extract(fit)
+    summarize_with_hessian(
+      est_beta = mean(samples$beta),
+      est_beta_int = mean(samples$beta_int),
+      cov_mat = cov_mat
+    )
+  }
+
+  if (model_type %in% c("3sample", "both")) {
     if (is.null(data_list_3sample))
       stop("data_list_3sample must be provided for the three-sample model.")
 
@@ -111,55 +191,14 @@ prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale)
 
-    stan_mod_3sample <- stan_model(model_code = stan_model_code_3, verbose = FALSE)
+    stan_mod_3sample <- rstan::stan_model(model_code = stan_model_code_3, verbose = FALSE)
 
-    # Run sampling for the 3-sample model.
-    fit_3 <- sampling(object = stan_mod_3sample,
-                      data = data_list_3sample,
-                      chains = chains,
-                      iter = iter,
-                      warmup = warmup,
-                      control = control_list,
-                      refresh = 0)
-
-    opt_3 <- optimizing(
-      object = stan_mod_3sample,
-      data = data_list_3sample,
-      hessian = TRUE)
-
-    hessian_reg_3 <- opt_3$hessian
-    cov_3 <- MASS::ginv(-hessian_reg_3)
-    rownames(cov_3) <- rownames(hessian_reg_3)
-    colnames(cov_3) <- colnames(hessian_reg_3)
-
-    samples_3 <- rstan::extract(fit_3)
-    est_beta_3 <- mean(samples_3$beta)
-    se_beta_3 <- sqrt(cov_3["beta", "beta"])
-    # se_beta_3 <- sd(samples_3$beta)
-    est_beta_int_3 <- mean(samples_3$beta_int)
-    se_beta_int_3 <-  sqrt(cov_3["beta_int", "beta_int"])
-    # se_beta_int_3 <- sd(samples_3$beta_int)
-    total_3 <- mean(samples_3$beta+samples_3$beta_int)
-    se_total_3 <- sqrt(cov_3["beta_int", "beta_int"]
-                       + cov_3["beta", "beta"]
-                       + 2 * cov_3["beta_int", "beta"])
-    # se_total_3 <- sd(samples_3$beta+samples_3$beta_int)
-
-    result_3sample <- data.frame(
-      est_beta = est_beta_3,
-      se_beta = se_beta_3,
-      pval_beta = 2 * (1 - pnorm(abs(est_beta_3)/se_beta_3)),
-      est_beta_int = est_beta_int_3,
-      se_beta_int = se_beta_int_3,
-      pval_beta_int = 2 * (1 - pnorm(abs(est_beta_int_3)/se_beta_int_3)),
-      total_effect = total_3,
-      pval_total = 2 * (1 - pnorm(abs(total_3)/se_total_3))
-    )
+    result_3sample <- run_stan_estimation(stan_mod_3sample, data_list_3sample)
 
     results$result_3sample <- result_3sample
   }
 
-if (model_type %in% c("2sample")) {
+if (model_type %in% c("2sample", "both")) {
   if (is.null(data_list_2sample))
     stop("data_list_2sample must be provided for the two-sample model.")
 
@@ -208,51 +247,9 @@ model {
 prior_inv_gamma_shape, prior_inv_gamma_scale,
 prior_inv_gamma_shape, prior_inv_gamma_scale)
 
-  stan_mod_2sample <- stan_model(model_code = stan_model_code_2, verbose = FALSE)
+  stan_mod_2sample <- rstan::stan_model(model_code = stan_model_code_2, verbose = FALSE)
 
-  # Run sampling for the 2-sample model.
-  fit_2 <- sampling(object = stan_mod_2sample,
-                    data = data_list_2sample,
-                    chains = chains,
-                    iter = iter,
-                    warmup = warmup,
-                    control = control_list,
-                    refresh = 0)
-
-  opt_2 <- optimizing(
-    object = stan_mod_2sample,
-    data = data_list_2sample,
-    hessian = TRUE)
-
-  hessian_reg_2 <- opt_2$hessian
-  cov_2 <- MASS::ginv(-hessian_reg_2)
-  rownames(cov_2) <- rownames(hessian_reg_2)
-  colnames(cov_2) <- colnames(hessian_reg_2)
-
-  # Extract posterior samples and compute summaries.
-  samples_2 <- rstan::extract(fit_2)
-  est_beta_2 <- mean(samples_2$beta)
-  se_beta_2 <- sqrt(cov_2["beta", "beta"])
-  # se_beta_2 <- sd(samples_2$beta)
-  est_beta_int_2 <- mean(samples_2$beta_int)
-  se_beta_int_2 <-  sqrt(cov_2["beta_int", "beta_int"])
-  # se_beta_int_2 <- sd(samples_2$beta_int)
-  total_2 <- mean(samples_2$beta+samples_2$beta_int)
-  se_total_2 <- sqrt(cov_2["beta_int", "beta_int"]
-                     + cov_2["beta", "beta"]
-                    + 2 * cov_2["beta_int", "beta"])
-  # se_total_2 <- sd(samples_2$beta+samples_2$beta_int)
-
-  result_2sample <- data.frame(
-    est_beta = est_beta_2,
-    se_beta = se_beta_2,
-    pval_beta = 2 * (1 - pnorm(abs(est_beta_2)/se_beta_2)),
-    est_beta_int = est_beta_int_2,
-    se_beta_int = se_beta_int_2,
-    pval_beta_int = 2 * (1 - pnorm(abs(est_beta_int_2)/se_beta_int_2)),
-    total_effect = total_2,
-    pval_total = 2 * (1 - pnorm(abs(total_2)/se_total_2))
-  )
+  result_2sample <- run_stan_estimation(stan_mod_2sample, data_list_2sample)
 
   results$result_2sample <- result_2sample
 }

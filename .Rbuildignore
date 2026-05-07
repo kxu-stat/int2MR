@@ -1,0 +1,7 @@
+^\.git$
+^\.DS_Store$
+^.*\.DS_Store$
+^\.\.Rcheck$
+^.*\.Rcheck$
+^.*_[0-9.]+\.tar\.gz$
+^int2MR\.Rproj$

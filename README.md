@@ -22,12 +22,27 @@ library(int2MR)
 
 Please refer to the ['int2MR' vignette](https://github.com/kxu-stat/int2MR/blob/main/vignettes/int2MR.pdf) for a tutorial to use the 'int2MR' package.
 
+By default, `int2MR()` uses MCMC sampling through `rstan::sampling()`. For a purely optimization-based run, set `estimation = "optimizing"`:
+
+```r
+result_2sample_opt <- int2MR(
+  data_list_2sample = example_2sample_data,
+  model_type = "2sample",
+  estimation = "optimizing",
+  prior_inv_gamma_shape = 0.1,
+  prior_inv_gamma_scale = 0.1
+)
+
+result_2sample_opt$result_2sample
+```
+
+The `estimation` argument controls how `est_beta` and `est_beta_int` are estimated: `estimation = "sampling"` uses MCMC posterior means, while `estimation = "optimizing"` uses the MAP estimate from `rstan::optimizing()`. In both modes, standard errors such as `se_beta` and `se_beta_int` are computed from the inverse negative Hessian.
+
 # Other
 The code for simulation and visualization is store in the folder [supp](https://github.com/kxu-stat/int2MR/blob/main/supp). The GWAS summary statistics from ROSMAP and primary data analysis results are availale at [Zenodo](https://doi.org/10.5281/zenodo.16341091).
 
 # Reference
-Ke Xu, Nathaniel Maydanchik, Bowei Kang, Jianhai Chen, Qixiang Chen, Gongyao Xu, Shinya Tasaki, David A. Bennett, Lin S. Chen. Integrative Mendelian Randomization for Detecting Exposure-by-group Interactions Using Group-Specific and Combined Summary Statistics. [doi.org/10.1101/2025.01.26.25321136](https://doi.org/10.1101/2025.01.26.25321136)
+Ke Xu, Nathaniel Maydanchik, Bowei Kang, Jianhai Chen, Qixiang Chen, Gongyao Xu, Shinya Tasaki, David A. Bennett, Lin S. Chen. Integrative Mendelian Randomization for Detecting Exposure-by-group Interactions Using Group-Specific and Combined Summary Statistics. [doi.org/10.1371/journal.pgen.1011819](https://doi.org/10.1371/journal.pgen.1011819)
 
 # Development
 This package is maintained by [kxu6@nd.edu](kxu6@nd.edu).
-

@@ -2,17 +2,18 @@
 % Please edit documentation in R/int2MR.R
 \name{int2MR}
 \alias{int2MR}
-\title{Run One Round of int2MR Estimation with Sampling and Model Type Option}
+\title{Run One Round of int2MR Estimation with Sampling or Optimization}
 \usage{
 int2MR(
   data_list_3sample = NULL,
   data_list_2sample = NULL,
-  model_type = c("3sample", "2sample"),
-  prior_inv_gamma_shape = 0.1,
-  prior_inv_gamma_scale = 0.1,
+  model_type = c("both", "3sample", "2sample"),
+  estimation = c("sampling", "optimizing"),
+  prior_inv_gamma_shape = 0.02,
+  prior_inv_gamma_scale = 0.02,
   chains = 2,
   iter = 5000,
-  warmup = 2500,
+  warmup = 2000,
   adapt_delta = 0.95
 )
 }
@@ -25,6 +26,11 @@ int2MR(
 "3sample" to run only the three-sample model,
 "2sample" to run only the two-sample model,
 or "both" (default) to run both.}
+
+\item{estimation}{A character string specifying the estimation method:
+"sampling" (default) to estimate effects using MCMC posterior means, or
+"optimizing" to use Stan's optimization-based MAP estimate with
+standard errors from the inverse negative Hessian in both modes.}
 
 \item{prior_inv_gamma_shape}{Prior shape parameter for the inverse-gamma distributions (default 0.02).}
 
@@ -40,10 +46,20 @@ or "both" (default) to run both.}
 }
 \value{
 A list with elements depending on model_type. For each executed model, a data frame summarizing
-        the posterior mean, standard deviation, and p-values for beta, beta_int, and the total effect is provided.
+        the estimate, Hessian-based standard error, and p-values for beta, beta_int, and the total effect is provided.
 }
 \description{
 This function takes input data lists for the three-sample and/or two-sample Stan models
-and returns posterior summaries from running rstan's sampling function. The user can specify
-which model(s) to run via the model_type parameter.
+and returns effect estimates from either rstan's sampling function or rstan's
+optimization function. Standard errors are computed from the inverse negative
+Hessian in both modes. The user can specify which model(s) to run via the
+model_type parameter.
+}
+\note{
+When you call \code{stan_model(model_code = ...)} with the same Stan code string and the same
+\code{prior_inv_gamma_shape}/\code{prior_inv_gamma_scale}, rstan will look for a previously compiled
+binary in \code{~/.R/stan/}; if found, it reuses it, otherwise it recompiles.
+To avoid slow repeated compilation in large-scale runs, either always pass identical hyperparameters
+so the cache hits, or move the two \code{stan_model()} calls outside of this function and pass the
+precompiled model objects into \code{int2MR()}.
 }

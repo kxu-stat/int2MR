@@ -20,4 +20,10 @@ result_2sample <- int2MR(data_list_2sample = example_2sample_data,
                  prior_inv_gamma_scale = 0.1,
                  chains = 2, iter = 5000, warmup = 1000,
                  adapt_delta = 0.95)
+
+result_2sample_opt <- int2MR(data_list_2sample = example_2sample_data,
+                 model_type = "2sample",
+                 estimation = "optimizing",
+                 prior_inv_gamma_shape = 0.1,
+                 prior_inv_gamma_scale = 0.1)
 result_2sample$result_2sample
